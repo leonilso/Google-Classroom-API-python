@@ -1,3 +1,6 @@
+# Este é o código de exemplo da API do google, ele serve para coletar os IDs das turmas útil para criar o banco de dados
+
+
 import os.path
 
 from google.auth.transport.requests import Request
