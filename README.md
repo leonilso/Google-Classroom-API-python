@@ -9,3 +9,5 @@ Para configurar o ambiente assista esse vídeo, ele está em inglês, mas está 
 https://www.youtube.com/watch?v=1WwLPcVaYxY
 
 O arquivo "token.json" é gerado assim que o código roda pela primeira vez, ou seja não é preciso baixá-lo de nenhum lugar como o "credential.json", entretanto caso seja necessário trocar de conta ou alterar os SCOPES o arquivo "token.json" deverá ser apagado.
+
+Os arquivos .csv só contem informações públicas, tudo que era pessoal eu apaguei, portanto deve se montar as tabelas manualmente (AINDA) pode se usar o Excel para isso, mas o formato deve ser o CSV com separador de ";" e com capacidade para caractéres utf-8
