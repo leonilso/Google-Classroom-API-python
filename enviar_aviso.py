@@ -1,3 +1,6 @@
+
+# Importando bibiotecas
+
 import os.path
 
 from google.auth.transport.requests import Request
@@ -10,7 +13,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 
 
-# If modifying these scopes, delete the file token.json.
+# Se modificar esses escopos, exclua o arquivo token.json.
 SCOPES = ["https://www.googleapis.com/auth/classroom.announcements"]
 
 
@@ -19,12 +22,12 @@ def main():
   Prints the names of the first 10 courses the user has access to.
   """
   creds = None
-  # The file token.json stores the user's access and refresh tokens, and is
-  # created automatically when the authorization flow completes for the first
-  # time.
+# O arquivo token.json armazena os tokens de acesso e atualização do usuário e é
+  # criado automaticamente quando o fluxo de autorização é concluído pela primeira vez
+  # tempo.
   if os.path.exists("token.json"):
     creds = Credentials.from_authorized_user_file("token.json", SCOPES)
-  # If there are no (valid) credentials available, let the user log in.
+  # Se não houver credenciais (válidas) disponíveis, deixe o usuário fazer login.
   if not creds or not creds.valid:
     if creds and creds.expired and creds.refresh_token:
       creds.refresh(Request())
@@ -33,12 +36,14 @@ def main():
           "credentials.json", SCOPES
       )
       creds = flow.run_local_server(port=0)
-    # Save the credentials for the next run
+    #Salve as credenciais para a próxima execução
     with open("token.json", "w") as token:
       token.write(creds.to_json())
 
   try:
     service = build("classroom", "v1", credentials=creds)
+
+    # Lendo arquivos
     dir = "banco_dados\\"
     if not os.path.exists(dir + "announcement.csv"):
         df_announcement = pd.DataFrame(columns=['ID', 'turma', 'reuniao'])
@@ -50,8 +55,11 @@ def main():
     slides = pd.read_csv(dir + "slides.csv", sep=';')
     recoordings = pd.read_csv(dir + "gravacoes.csv", sep=';')
 
+    # Iniciando variáveis
     day_post = False
     today = datetime.today().date()
+
+    # Calculando dia
     for i in range(len(meetings['SEMANA'])):
         day_meet_list = datetime.strptime(meetings['SEMANA'][i], "%d/%m/%Y")
         day_meet_list = day_meet_list.date()
@@ -64,6 +72,7 @@ def main():
         classes_id = classes['ID'].to_list()
 
         for i in classes_id:
+            # Coletando informações do banco de dados ( arquivos csv)
             classe = classes.loc[classes["ID"] == i, "NOME"].values[0]
             n_meet = meetings.loc[meetings["SEMANA"] == day_meet, "ID"].values[0]
             meet_name = meetings.loc[meetings["SEMANA"] == day_meet, "NOME"].values[0]
@@ -77,6 +86,8 @@ def main():
             link_meet = f"{classes.loc[classes["ID"] == i, "LINK_REUNIAO"].values[0]}"
             link_recording = f"{recoordings.loc[recoordings["ID"] == n_meet, classe].values[0]}"
 
+          # Criando recado, infelizmente o announcement não tem a opção de agendar a publicação, então deve ser usado o estado PUBLISHED,
+          #  a lógica de publicação deve ser feita com o python, ainda não fiz por falta de tempo.
             announcement = {
                 "text": f'''
                 {n_meet}º Encontro
@@ -91,10 +102,13 @@ def main():
                 "state": "PUBLISHED",
             }
 
+            # Postagem 
             response = service.courses().announcements().create(
                 courseId=i, body=announcement
             ).execute()
 
+
+            # O id da postagem deve ser salvo para a posterior atualização com o link da gravação
             new_line = pd.DataFrame([{
                 'ID': response['id'],
                 'turma': classe,
@@ -103,6 +117,7 @@ def main():
             df_announcement = pd.concat([df_announcement, new_line], ignore_index=True)
 
             print(f"Aviso criado com ID: {response['id']} ")
+        # Salva em um csv o id das postagens
         df_announcement.to_csv( dir + 'announcement.csv', index=False, sep=';')
   except HttpError as error:
     print(f"An error occurred: {error}")
