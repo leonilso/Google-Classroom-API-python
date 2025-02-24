@@ -7,7 +7,7 @@ faltosos = pd.read_csv("banco_dados\\faltantes.csv", sep=";")
 
 # Iterando sobre os alunos faltosos
 for i in range(len(faltosos)): 
-    # Formatando o número para a bibblioteca aceitar 
+    # Formatando o número para a biblioteca aceitar 
     numero = "+55" + f"{faltosos["TELEFONE"][i]}" 
 
     # Definir caminho da imagem
